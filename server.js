@@ -1,6 +1,7 @@
 const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
+const dotenv = require("dotenv");
 
 const bodyPareser = require("body-parser");
 
@@ -11,11 +12,13 @@ app.use(express.json());
 
 app.use(cors());
 
+dotenv.config({ path: "./.env" });
+
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "instagram_clone",
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE,
 });
 
 db.connect((error) => {
@@ -28,7 +31,7 @@ db.connect((error) => {
 
 app.get("/posts", (req, res) => {
   try {
-    const sqlQuerry = "SELECT * FROM posts";
+    const sqlQuerry = "SELECT * FROM Posts";
 
     db.query(sqlQuerry, async (err, data) => {
       if (err) {
