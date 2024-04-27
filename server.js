@@ -54,7 +54,7 @@ const upload = multer({
 }).single("image");
 
 const projectId = "steady-fin-421015";
-const keyFileName = "";
+const keyFileName = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 const storage = new Storage({
   projectId,
