@@ -7,7 +7,7 @@ const bodyPareser = require("body-parser");
 const multer = require("multer");
 const path = require("path");
 const { isValidString, checkValidPassword } = require("./helpers/helpers");
-
+const { Storage } = require("@google-cloud/storage");
 const app = express();
 app.use(bodyPareser.json());
 app.use(express.static("uploads"));
@@ -48,21 +48,20 @@ app.get("/posts", (req, res) => {
   }
 });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/images");
-  },
-  filename: function (req, file, cb) {
-    cb(
-      null,
-      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
-    );
-  },
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1204 },
+}).single("image");
+
+let projectId = "steady-fin-421015";
+let keyFilename = "";
+
+const storage = new Storage({
+  projectId,
+  keyFilename,
 });
 
-const upload = multer({
-  storage: storage,
-}).single("image");
+const bucket = storage.bucket("twtcloneimages");
 
 app.post("/postUpload", upload, (req, res) => {
   const image = req?.file?.filename;
