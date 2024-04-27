@@ -7,7 +7,7 @@ const bodyPareser = require("body-parser");
 const multer = require("multer");
 const path = require("path");
 const { isValidString, checkValidPassword } = require("./helpers/helpers");
-
+const { Storage } = require("@google-cloud/storage");
 const app = express();
 app.use(bodyPareser.json());
 app.use(express.static("uploads"));
@@ -48,42 +48,59 @@ app.get("/posts", (req, res) => {
   }
 });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/images");
-  },
-  filename: function (req, file, cb) {
-    cb(
-      null,
-      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
-    );
-  },
-});
-
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
+  limits: { fieldSize: 5 * 1024 * 1024 },
 }).single("image");
 
-app.post("/postUpload", upload, (req, res) => {
-  const image = req?.file?.filename;
-  const { user_id, post_description } = req.body;
+const projectId = "steady-fin-421015";
+const keyFileName = "";
 
-  const sql =
-    "INSERT INTO Posts (user_id, post_description, post_Image) VALUES (?, ?, ?)";
+const storage = new Storage({
+  projectId,
+  keyFileName,
+});
+
+const bucket = storage.bucket("twtcloneimages");
+
+app.post("/postUpload", upload, (req, res) => {
   try {
-    db.query(sql, [user_id, post_description, image], async (err, data) => {
-      if (err) {
-        return res.json({ status: "failure", message: err });
-      } else if (data) {
-        return res.json({
-          status: "success",
-          message: "post has been added",
-        });
-      }
-    });
+    if (req.file) {
+      const blob = bucket.file(req.file.originalname);
+      const blobStream = blob.createWriteStream();
+
+      blobStream.on("error", (err) => {
+        res.status(500).send(`Error uploading file to Cloud Storage : ${err}`);
+      });
+
+      blobStream.on("finish", () => {
+        res.status(200).send("success");
+      });
+
+      blobStream.end(req.file.buffer);
+    }
   } catch (err) {
     return res.json({ status: "failed", message: err });
   }
+
+  // const image = req?.file?.filename;
+  // const { user_id, post_description } = req.body;
+  // const sql =
+  //   "INSERT INTO Posts (user_id, post_description, post_Image) VALUES (?, ?, ?)";
+  // try {
+  //   db.query(sql, [user_id, post_description, image], async (err, data) => {
+  //     if (err) {
+  //       return res.json({ status: "failure", message: err });
+  //     } else if (data) {
+  //       return res.json({
+  //         status: "success",
+  //         message: "post has been added",
+  //       });
+  //     }
+  //   });
+  // } catch (err) {
+  //   return res.json({ status: "failed", message: err });
+  // }
 });
 
 const server = app.listen(8083, () => {
