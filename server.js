@@ -41,7 +41,6 @@ app.get("/posts", (req, res) => {
       if (err) {
         return res.json({ status: "failure", message: err });
       } else if (data) {
-        console.log(data, "moejdej");
         return res.json({ status: "success", message: data });
       }
     });
@@ -95,8 +94,6 @@ app.post("/postUpload", upload, async (req, res) => {
         dataImgBuffer = resizedImageBuffer;
       }
     }
-
-    console.log(dataImgBuffer, "mirjfijri");
 
     const sql =
       "INSERT INTO Posts (user_id, post_description, post_Image) VALUES (?, ?, ?)";
