@@ -89,7 +89,7 @@ router.route("/loginUser").get((req, res) => {
           data[0]?.password,
           (err, response) => {
             if (err) {
-              return res.json({ status: "failed", message: err });
+              return res.json({ status: "failure", message: err });
             }
 
             if (response) {
