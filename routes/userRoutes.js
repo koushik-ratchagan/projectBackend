@@ -2,7 +2,6 @@ const express = require("express");
 const db = require("../dbConfig/dbConfig");
 const router = express.Router();
 const { isValidString, isArrayNonEmpty } = require("../helpers/helpers");
-const bycrypt = require("bcrypt");
 
 router.route("/createUser").post((req, res) => {
   try {
@@ -37,27 +36,18 @@ router.route("/createUser").post((req, res) => {
             message: "user already exists",
           });
         } else {
-          bycrypt.hash(password.toString(), 10, (err, hash) => {
-            if (err) {
-              return res.json({
-                status: "failed",
-                message: "hash password error",
-              });
-            }
-
-            db.query(
-              INSERT_Querry,
-              [userName, hash, phoneNumber, dateOfBirth],
-              async (err, data) => {
-                if (err) {
-                  return res.json({ status: "failure", message: err });
-                }
-                if (data) {
-                  return res.json({ status: "success", message: data });
-                }
+          db.query(
+            INSERT_Querry,
+            [userName, password, phoneNumber, dateOfBirth],
+            async (err, data) => {
+              if (err) {
+                return res.json({ status: "failure", message: err });
               }
-            );
-          });
+              if (data) {
+                return res.json({ status: "success", message: data });
+              }
+            }
+          );
         }
       }
     });
@@ -84,27 +74,17 @@ router.route("/loginUser").get((req, res) => {
       }
 
       if (isArrayNonEmpty(data)) {
-        bycrypt.compare(
-          password.toString(),
-          data[0]?.password,
-          (err, response) => {
-            if (err) {
-              return res.json({ status: "failure", message: err });
-            }
-
-            if (response) {
-              return res.json({
-                status: "success",
-                message: "log in successfully ",
-              });
-            } else {
-              return res.json({
-                status: "success",
-                message: "password did not  match",
-              });
-            }
-          }
-        );
+        if (data[0]?.password === password) {
+          return res.json({
+            status: "success",
+            message: "login successfully",
+          });
+        } else {
+          return res.json({
+            status: "failure",
+            message: "password dint match",
+          });
+        }
       }
     });
   } catch (e) {
