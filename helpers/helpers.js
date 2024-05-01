@@ -1,6 +1,11 @@
 const isValidString = (data) => {
   return data !== undefined && data !== null && data !== "";
 };
+
+const isArrayNonEmpty = (data) => {
+  return data !== undefined && data !== null && data?.length > 0;
+};
+
 const checkValidPassword = (data) => {
   const passwordRegex = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}|:<>?]).{6,}$/;
 
@@ -10,4 +15,5 @@ const checkValidPassword = (data) => {
 module.exports = {
   isValidString,
   checkValidPassword,
+  isArrayNonEmpty,
 };
