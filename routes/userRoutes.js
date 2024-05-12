@@ -56,7 +56,7 @@ router.route("/createUser").post((req, res) => {
   }
 });
 
-router.route("/loginUser").get((req, res) => {
+router.route("/loginUser").post((req, res) => {
   try {
     const { phoneNumber, password } = req.body;
 
