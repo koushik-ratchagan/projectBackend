@@ -9,7 +9,9 @@ const bucket = require("../dbConfig/googleImageConfig");
 
 router.route("/").get((req, res) => {
   try {
-    const sqlQuerry = "SELECT * FROM Posts";
+    const sqlQuerry = `SELECT Posts.*, usersDetails.userName
+    FROM Posts
+    INNER JOIN usersDetails ON Posts.user_id = usersDetails.userId`;
 
     db.query(sqlQuerry, async (err, data) => {
       if (err) {
