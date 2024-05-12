@@ -78,6 +78,7 @@ router.route("/loginUser").get((req, res) => {
           return res.json({
             status: "success",
             message: "login successfully",
+            data: data[0],
           });
         } else {
           return res.json({
